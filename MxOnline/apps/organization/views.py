@@ -14,6 +14,7 @@ class OrgView(View):
         all_orgs = CourseOrg.objects.all()
 
         category = request.GET.get('ct','')
+        current_page = 'org'
         if category:
             all_orgs = all_orgs.filter(category=category)
         #热门机构
@@ -52,6 +53,7 @@ class OrgView(View):
             "category":category,
             "hot_orgs":hot_orgs,
             "sort":sort,
+            "current_page":current_page,
         })
 
 
