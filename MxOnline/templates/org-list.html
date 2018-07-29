@@ -173,6 +173,7 @@
                 success: function(data) {
                     if(data.status == 'success'){
                         $('#jsStayForm')[0].reset();
+                        $('#jsCompanyTips').html('')
                         alert("提交成功")
                     }else if(data.status == 'fail'){
                         $('#jsCompanyTips').html(data.msg)

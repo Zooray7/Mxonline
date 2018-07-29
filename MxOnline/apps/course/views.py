@@ -2,10 +2,11 @@ from django.shortcuts import render
 from django.views.generic import View
 from django.http import HttpResponse
 from pure_pagination import Paginator,PageNotAnInteger
-
-from .models import Course,CourseResource
-from operation.models import UserFavorite,CourseComments,UserCourse
 from django.contrib.auth.mixins import LoginRequiredMixin
+
+from .models import Course,CourseResource,Video
+from operation.models import UserFavorite,CourseComments,UserCourse
+
 class CourseListView(View):
     def get(self,request):
         all_courses = Course.objects.all().order_by("-add_time")
@@ -112,12 +113,28 @@ class CourseCommentView(LoginRequiredMixin,View):
     redirect_field_name = 'redirect_to'
     def get(self,request,course_id):
         course = Course.objects.get(id=int(course_id))
+        # 选出学了这门课的学生关系
+        user_courses = UserCourse.objects.filter(course=course)
+        # 学习这门课的所有用户id
+        user_ids = [user_course.user.id for user_course in user_courses]
+        # 所有用户学习的课程
+        all_user_courses = UserCourse.objects.filter(user_id__in=user_ids)
+        # 所有课程id
+        course_ids = [all_user_course.course_id for all_user_course in all_user_courses]
+        # 去掉列表里一样的课程id
+        course_ids = list(set(course_ids))
+
+        # 删除本课程id
+        course_ids.remove(int(course_id))
+        relate_courses = Course.objects.filter(id__in=course_ids).order_by("-click_nums")[:5]
+
         all_resources = CourseResource.objects.filter(course=course)
         all_comments = CourseComments.objects.all()
         return render(request, "course-comment.html", {
             "course": course,
             "course_resources":all_resources,
             "all_comments":all_comments,
+            "relate_courses":relate_courses,
         })
 
 
@@ -141,3 +158,46 @@ class AddCommentsView(View):
             return HttpResponse('{"status":"success", "msg":"评论成功"}', content_type='application/json')
         else:
             return HttpResponse('{"status":"fail", "msg":"评论失败"}', content_type='application/json')
+
+
+class VideoPlayView(LoginRequiredMixin,View):
+    """
+    视频播放页面
+    """
+    login_url = 'login'
+    redirect_field_name = 'redirect_to'
+
+    def get(self, request, video_id):
+        video = Video.objects.get(id=int(video_id))
+
+        course = video.lesson.course
+        # 查询用户是否开始学习了该课，如果还未学习则，加入用户课程表
+        user_courses = UserCourse.objects.filter(user=request.user, course=course)
+        if not user_courses:
+            user_course = UserCourse(user=request.user, course=course)
+            user_course.save()
+
+        # 选出学了这门课的学生关系
+        user_courses = UserCourse.objects.filter(course=course)
+        # 学习这门课的所有用户id
+        user_ids = [user_course.user.id for user_course in user_courses]
+        # 所有用户学习的课程
+        all_user_courses = UserCourse.objects.filter(user_id__in=user_ids)
+        # 所有课程id
+        course_ids = [all_user_course.course_id for all_user_course in all_user_courses]
+        # 去掉列表里一样的课程id
+        course_ids = list(set(course_ids))
+
+        course_id = course.id
+        # 删除本课程id
+        course_ids.remove(int(course_id))
+        relate_courses = Course.objects.filter(id__in=course_ids).order_by("-click_nums")[:5]
+        # 查询课程资源
+        all_resources = CourseResource.objects.filter(course=course)
+
+        return render(request, "course-play.html", {
+            "course": course,
+            "course_resources": all_resources,
+            "relate_courses": relate_courses,
+            "video":video,
+        })

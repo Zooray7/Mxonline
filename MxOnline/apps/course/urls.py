@@ -1,6 +1,6 @@
 from django.urls import path, re_path
 
-from .views import CourseListView,CourseDetailView,CourseInfoView,CourseCommentView,AddCommentsView
+from .views import CourseListView,CourseDetailView,CourseInfoView,CourseCommentView,AddCommentsView,VideoPlayView
 app_name = "course"
 
 urlpatterns = [
@@ -14,4 +14,7 @@ urlpatterns = [
     re_path('comment/(?P<course_id>\d+)', CourseCommentView.as_view(), name="course_comment"),
     #添加评论
     path('add_comment/', AddCommentsView.as_view(), name="add_comment"),
+    #视频播放
+    re_path('video/(?P<video_id>\d+)/', VideoPlayView.as_view(), name="video_play"),
+
 ]
