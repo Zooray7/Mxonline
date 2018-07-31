@@ -23,6 +23,7 @@ class Course(models.Model):
     learn_times = models.IntegerField("学习时长(小时数)",default=0)
     students = models.IntegerField("学习人数",default=0)
     fav_nums = models.IntegerField("收藏人数",default=0)
+    is_banner = models.BooleanField('是否轮播', default=False)
     image = models.ImageField("封面图",upload_to="courses/%Y/%m",max_length=100,null=True, blank=True)
     click_nums = models.IntegerField("点击数",default=0)
     category = models.CharField("课程类别",max_length=30,default="后端开发")

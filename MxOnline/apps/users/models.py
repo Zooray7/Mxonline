@@ -21,11 +21,16 @@ class UserProfile(AbstractUser):
     def __str__(self):
         return self.username
 
+    def get_unread_nums(self):
+        #只能在这里引入，否则会循环引用,获取未读消息数量
+        from operation.models import UserMessage
+        return UserMessage.objects.filter(user=self.id,has_read=False).count()
+
 
 class EmailVerifyRecord(models.Model):
     code = models.CharField("验证码",max_length=20)
     email = models.EmailField("邮箱",max_length=50)
-    send_type = models.CharField('验证码类型',choices=(("register","注册"),("forget","找回密码")),max_length=10)
+    send_type = models.CharField('验证码类型',choices=(("register","注册"),("forget","找回密码"),('update_email','修改邮箱')),max_length=30)
     send_time = models.DateTimeField('发送时间',default=datetime.now)
 
     class Meta:
@@ -41,10 +46,12 @@ class Banner(models.Model):
     title = models.CharField("标题",max_length=100)
     image = models.ImageField("轮播图",upload_to='banner/%Y%m',max_length=100)
     url = models.URLField('访问地址',max_length=200)
-    index = models.IntegerField('顺序',default=100)
+    index = models.IntegerField('顺序',default=1)
     add_time =models.DateTimeField('添加时间',default=datetime.now)
 
     class Meta:
         verbose_name = "轮播图"
         verbose_name_plural = verbose_name
 
+    def __str__(self):
+        return self.title

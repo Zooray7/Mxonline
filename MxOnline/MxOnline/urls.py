@@ -19,16 +19,19 @@ Including another URLconf
 import xadmin
 
 from django.urls import path,include,re_path
-from django.views.generic import TemplateView
+# from django.views.generic import TemplateView
 from django.views.static import serve
+from django.conf.urls import handler404, handler500
 
 from users import views
-from MxOnline.settings import MEDIA_ROOT
+from MxOnline.settings import MEDIA_ROOT,STATIC_ROOT
 
 urlpatterns = [
     path('xadmin/', xadmin.site.urls),
-    path('',TemplateView.as_view(template_name='index.html'),name='index'),
+    # path('',TemplateView.as_view(template_name='index.html'),name='index'),
+    path('', views.IndexView.as_view(), name='index'),
     path('login/',views.LoginView.as_view(),name='login'),
+    path('logout/', views.LogoutView.as_view(), name="logout"),
     path('register/',views.RegisterView.as_view(),name = 'register'),
     path('captcha/',include('captcha.urls')),
     re_path('active/(?P<active_code>.*)/',views.ActiveUserView.as_view(),name='user_active'),
@@ -41,5 +44,15 @@ urlpatterns = [
     path("org/", include('organization.urls',namespace="org")),
     #课程url
     path("course/", include('course.urls', namespace="course")),
+    #个人信息
+    path("users/",include('users.urls',namespace="users")),
 
+    #静态文件
+    re_path(r'^static/(?P<path>.*)',serve,{"document_root": STATIC_ROOT }),
 ]
+
+# #404页面配置
+# handler404 = 'users.views.page_not_found'
+#
+# # 全局500页面配置
+# handler500 = 'users.views.page_error'

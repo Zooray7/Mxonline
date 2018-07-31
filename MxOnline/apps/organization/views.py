@@ -2,7 +2,7 @@ from django.shortcuts import render,redirect
 from django.http import HttpResponse
 from django.views.generic.base import View
 from pure_pagination import Paginator,PageNotAnInteger
-
+from django.db.models import Q
 from .models import CourseOrg,CityDict,Teacher
 from .forms import UserAskForm
 from operation.models import UserFavorite
@@ -13,6 +13,12 @@ class OrgView(View):
     def get(self,request):
         #取出所有课程机构
         all_orgs = CourseOrg.objects.all()
+
+        search_keywords = request.GET.get('keywords', '')
+        if search_keywords:
+            # 在name字段进行操作,做like语句的操作。i代表不区分大小写
+            # or操作使用Q
+            all_orgs = all_orgs.filter(Q(name__icontains=search_keywords) | Q(desc__icontains=search_keywords))
 
         category = request.GET.get('ct','')
         current_page = 'org'
@@ -84,6 +90,9 @@ class OrgHomeView(View):
         # 根据id找到课程机构
         course_org = CourseOrg.objects.get(id=int(org_id))
 
+        course_org.click_nums += 1
+        course_org.save()
+
         # 判断收藏状态
         has_fav = False
         if request.user.is_authenticated:
@@ -103,7 +112,7 @@ class OrgHomeView(View):
 
 class OrgCourseView(View):
     """
-    机构课列表页程
+    机构课列表页
     """
 
     def get(self,request,org_id):
@@ -192,6 +201,24 @@ class AddFavView(View):
         if exist_records:
             # 如果记录已经存在， 则表示用户取消收藏
             exist_records.delete()
+            if int(type) == 1:
+                course = Course.objects.get(id=int(id))
+                course.fav_nums -= 1
+                if course.fav_nums < 0:
+                    course.fav_nums = 0
+                course.save()
+            elif int(type) == 2:
+                org = CourseOrg.objects.get(id=int(id))
+                org.fav_nums -= 1
+                if org.fav_nums < 0:
+                    org.fav_nums = 0
+                org.save()
+            elif int(type) == 3:
+                teacher = Teacher.objects.get(id=int(id))
+                teacher.fav_nums -= 1
+                if teacher.fav_nums < 0:
+                    teacher.fav_nums = 0
+                teacher.save()
             return HttpResponse('{"status":"success", "msg":"收藏"}', content_type='application/json')
         else:
             user_fav = UserFavorite()
@@ -201,6 +228,20 @@ class AddFavView(View):
                 user_fav.fav_type = int(type)
                 user_fav.user = request.user
                 user_fav.save()
+
+                if int(type) == 1:
+                    course = Course.objects.get(id=int(id))
+                    course.fav_nums += 1
+                    course.save()
+                elif int(type) == 2:
+                    org = CourseOrg.objects.get(id=int(id))
+                    org.fav_nums += 1
+                    org.save()
+                elif int(type) == 3:
+                    teacher = Teacher.objects.get(id=int(id))
+                    teacher.fav_nums += 1
+                    teacher.save()
+
                 return HttpResponse('{"status":"success", "msg":"已收藏"}', content_type='application/json')
             else:
                 return HttpResponse('{"status":"fail", "msg":"收藏出错"}', content_type='application/json')
@@ -211,6 +252,13 @@ class TeacherListView(View):
         current_page = 'teacher'
         all_teachers = Teacher.objects.all()
         # 总共有多少老师使用count进行统计
+        # 搜索功能
+        search_keywords = request.GET.get('keywords', '')
+        if search_keywords:
+            # 在name字段进行操作,做like语句的操作。i代表不区分大小写
+            # or操作使用Q
+            all_teachers = all_teachers.filter(Q(name__icontains=search_keywords)|Q(work_company__icontains=search_keywords)|Q(work_position__icontains=search_keywords))
+
         teacher_nums = all_teachers.count()
         #人气排序
         sort = request.GET.get('sort','')
@@ -237,6 +285,9 @@ class TeacherDetailView(View):
     def get(self,request,teacher_id):
         teacher = Teacher.objects.get(id=int(teacher_id))
         all_courses = Course.objects.filter(teacher=teacher)
+
+        teacher.click_nums += 1
+        teacher.save()
 
         has_teacher_faved = False
         if UserFavorite.objects.filter(user=request.user,fav_id=teacher.id,fav_type=3):

@@ -1,8 +1,13 @@
 import xadmin
 
-
-from .models import EmailVerifyRecord,Banner
 from xadmin import views
+# from xadmin.plugins.auth import UserAdmin
+from .models import EmailVerifyRecord,Banner,UserProfile
+
+
+
+# class UserProfileAdmin(UserAdmin):
+#     pass
 
 
 class BaseSetting(object):
@@ -27,7 +32,12 @@ class EmailVerifyRecordAdmin():
     list_display = ['code','email','send_type','send_time']
     search_fields = ['code','email','send_type']
     list_filter = ['code','email','send_type','send_time']
+    # model_icon = 'fa fa-user'
+    # ordering = ['send_time'] 排序
+    #readonly_fields = ['']字段只读，不可以修改
+    #exclude = ['']  不显示哪些，和readonly_fields冲突
 
+    #relfield_style = 'fk-ajax'下拉框搜索，数据量过大时很有用，当有外键指向他，会以ajax方式加载
 xadmin.site.register(EmailVerifyRecord,EmailVerifyRecordAdmin)
 
 
@@ -39,3 +49,4 @@ class BannerAdmin(object):
 # 将基本配置管理与view绑定
 xadmin.site.register(views.BaseAdminView, BaseSetting)
 xadmin.site.register(Banner,BannerAdmin)
+# xadmin.site.register(UserProfile, UserProfileAdmin)
