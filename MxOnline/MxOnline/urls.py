@@ -21,10 +21,10 @@ import xadmin
 from django.urls import path,include,re_path
 # from django.views.generic import TemplateView
 from django.views.static import serve
-from django.conf.urls import handler404, handler500
 
 from users import views
 from MxOnline.settings import MEDIA_ROOT,STATIC_ROOT
+
 
 urlpatterns = [
     path('xadmin/', xadmin.site.urls),
@@ -49,10 +49,13 @@ urlpatterns = [
 
     #静态文件
     re_path(r'^static/(?P<path>.*)',serve,{"document_root": STATIC_ROOT }),
+    #富文本
+    path('ueditor/',include('DjangoUeditor.urls' )),
 ]
 
-# #404页面配置
+#404页面配置
 # handler404 = 'users.views.page_not_found'
 #
-# # 全局500页面配置
+#
+# #全局500页面配置
 # handler500 = 'users.views.page_error'

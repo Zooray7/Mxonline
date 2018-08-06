@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     'crispy_forms',
     'captcha',
     'pure_pagination',
+    'DjangoUeditor',
 
 ]
 AUTH_USER_MODEL = 'users.UserProfile'
@@ -98,8 +99,8 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'mxonline',
         'USER': 'root',
-        'PASSWORD': 'zl2015',
-        'HOST': '127.0.0.1',
+        'PASSWORD': 'ray2015',
+        'HOST': '47.96.103.25',
         'PORT': '3306',
     }
 }
@@ -150,10 +151,10 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.9/howto/static-files/
 
 STATIC_URL = '/static/'
-# STATICFILES_DIRS = (
-#     os.path.join(BASE_DIR,'static'),
-# )
+STATICFILES_DIRS = (
+    os.path.join(BASE_DIR,'static'),
+)
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR,'media')
 
-STATIC_ROOT = os.path.join(BASE_DIR,'static')
+# STATIC_ROOT = os.path.join(BASE_DIR,'static')

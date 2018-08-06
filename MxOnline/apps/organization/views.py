@@ -290,11 +290,13 @@ class TeacherDetailView(View):
         teacher.save()
 
         has_teacher_faved = False
-        if UserFavorite.objects.filter(user=request.user,fav_id=teacher.id,fav_type=3):
-            has_teacher_faved = True
         has_org_faved = False
-        if UserFavorite.objects.filter(user=request.user, fav_id=teacher.org.id, fav_type=2):
-            has_org_faved = True
+        if request.user.is_authenticated:
+            if UserFavorite.objects.filter(user=request.user,fav_id=teacher.id,fav_type=3):
+                has_teacher_faved = True
+
+            if UserFavorite.objects.filter(user=request.user, fav_id=teacher.org.id, fav_type=2):
+                has_org_faved = True
         # 讲师排行榜
         sorted_teacher = Teacher.objects.all().order_by("-click_nums")[:3]
         return render(request, 'teacher-detail.html', {

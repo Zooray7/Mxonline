@@ -37,7 +37,7 @@ class EmailVerifyRecordAdmin():
     #readonly_fields = ['']字段只读，不可以修改
     #exclude = ['']  不显示哪些，和readonly_fields冲突
 
-    #relfield_style = 'fk-ajax'下拉框搜索，数据量过大时很有用，当有外键指向他，会以ajax方式加载
+    #relfield_style = 'fk-ajax'下拉框搜索，数据量过大时很有用，当有外键指向他，会以ajax方式加载,设在外键的里面
 xadmin.site.register(EmailVerifyRecord,EmailVerifyRecordAdmin)
 
 
